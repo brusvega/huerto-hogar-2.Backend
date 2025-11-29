@@ -24,20 +24,21 @@ public class Producto {
     @Column(nullable = false)
     private Integer stock;
 
+    // URL a la imagen almacenada en /uploads
     @Column(length = 255)
-    private String imagen;
+    private String imagenUrl;
 
     @Column(name = "fecha_creacion", updatable = false, insertable = false)
     private LocalDateTime fechaCreacion;
 
     public Producto() {}
 
-    public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, String imagen) {
+    public Producto(String nombre, String descripcion, BigDecimal precio, Integer stock, String imagenUrl) {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
         this.stock = stock;
-        this.imagen = imagen;
+        this.imagenUrl = imagenUrl;
     }
 
     // GETTERS y SETTERS
@@ -57,8 +58,8 @@ public class Producto {
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
 
-    public String getImagen() { return imagen; }
-    public void setImagen(String imagen) { this.imagen = imagen; }
+    public String getImagenUrl() { return imagenUrl; }
+    public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
 }

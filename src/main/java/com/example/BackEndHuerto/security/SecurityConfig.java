@@ -44,7 +44,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
     }
 
 
@@ -55,6 +55,11 @@ public class SecurityConfig {
             @Override
             public Authentication authenticate(Authentication authentication)
                     throws AuthenticationException {
+
+                // EVITAR AUTENTICAR RUTAS PÚBLICAS O PETICIONES SIN CREDENCIALES
+                if (authentication.getCredentials() == null || authentication.getName() == null) {
+                    return null;
+                }
 
                 String email = authentication.getName();
                 String password = authentication.getCredentials().toString();
@@ -91,8 +96,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/productos/**").permitAll()
-                        .requestMatchers("/api/productos/**").hasRole("ADMIN")
+                        .requestMatchers("/api/productos/**").permitAll()
+                        .requestMatchers("/api/usuarios/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

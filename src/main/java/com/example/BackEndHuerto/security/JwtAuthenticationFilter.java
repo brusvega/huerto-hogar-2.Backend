@@ -28,19 +28,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String path = request.getServletPath();
+
+        // ==============================
+        // RUTAS PÚBLICAS → SE SALTAN JWT
+        // ==============================
+        if (path.startsWith("/api/auth")
+                || path.startsWith("/api/productos")
+                || path.startsWith("/api/usuarios")
+                || path.startsWith("/uploads")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // ==============================
+        // LÓGICA JWT NORMAL
+        // ==============================
         final String authHeader = request.getHeader("Authorization");
 
-        // Si no trae header o no empieza con Bearer, no hacemos nada
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extraer token
         final String jwt = authHeader.substring(7);
-        final String email = jwtService.extractEmail(jwt); // subject del token
+        final String email = jwtService.extractEmail(jwt);
 
-        // Si hay email y aún no está autenticado…
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -58,12 +72,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                // Aquí se autentica el usuario en Spring
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        // Sigue el flujo normal
         filterChain.doFilter(request, response);
     }
 }

@@ -25,15 +25,20 @@ public class AuthService {
     // LOGIN ---------------------------------------------------------
     public AuthResponse login(LoginRequest request) {
 
+        Usuario user = usuarioRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (user.getPassword() != null && !user.getPassword().startsWith("$2")) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            usuarioRepository.save(user);
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
-
-        Usuario user = usuarioRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         String token = jwtService.generateToken(user);
 
@@ -44,16 +49,20 @@ public class AuthService {
     // REGISTER ------------------------------------------------------
     public AuthResponse register(RegisterRequest request) {
 
+        if (usuarioRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+
         Usuario u = new Usuario();
         u.setNombre(request.getNombre());
         u.setEmail(request.getEmail());
         u.setPassword(passwordEncoder.encode(request.getPassword()));
-        u.setRol("CLIENTE");  // rol por defecto
+        u.setRol("CLIENTE");
 
         usuarioRepository.save(u);
 
         String token = jwtService.generateToken(u);
 
-        return new AuthResponse(token, u.getRol());
+        return new AuthResponse(token, "ROLE_" + u.getRol().toUpperCase());
     }
 }

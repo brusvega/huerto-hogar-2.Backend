@@ -29,7 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String path = request.getServletPath();
-
         // ==============================
         // RUTAS PÚBLICAS → SE SALTAN JWT
         // ==============================
@@ -41,7 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
         // ==============================
         // LÓGICA JWT NORMAL
         // ==============================
